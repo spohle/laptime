@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { formatMinuteLabel } from '../lib/timezone'
 
 function TimeControls({
@@ -6,12 +6,9 @@ function TimeControls({
   selectedMinute,
   onDateChange,
   onMinuteChange,
-  timeZone,
   minMinute,
   maxMinute,
 }) {
-  const dateInputRef = useRef(null)
-
   const thumbPercent = useMemo(() => {
     if (maxMinute <= minMinute) return 0
     return ((selectedMinute - minMinute) / (maxMinute - minMinute)) * 100
@@ -20,9 +17,8 @@ function TimeControls({
   const handleSliderChange = (event) => {
     onMinuteChange(Number(event.target.value))
   }
-  const openDatePicker = () => {
-    const input = dateInputRef.current
-    if (!input) return
+  const openDatePicker = (event) => {
+    const input = event.currentTarget
     if (typeof input.showPicker === 'function') {
       input.showPicker()
     } else {
@@ -32,30 +28,17 @@ function TimeControls({
 
   return (
     <section className="min-w-0 border border-white/10 bg-slateDeep/70 p-3 sm:p-4">
-      <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+      <div className="mb-3">
         <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-slate-200">
           Date
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <input
-              ref={dateInputRef}
-              className="min-h-11 w-full min-w-0 rounded border border-white/25 bg-slate-900/90 px-3 py-2 text-base text-white [color-scheme:dark] sm:min-h-0 sm:w-auto sm:min-w-[11rem] sm:text-sm"
-              type="date"
-              value={selectedDate}
-              onChange={(event) => onDateChange(event.target.value)}
-            />
-            <button
-              type="button"
-              onClick={openDatePicker}
-              className="min-h-11 shrink-0 rounded border border-white/20 bg-black/20 px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-100 sm:min-h-0 sm:px-3"
-            >
-              Pick
-            </button>
-          </div>
+          <input
+            className="min-h-11 w-full min-w-0 cursor-pointer rounded border border-white/25 bg-slate-900/90 px-3 py-2 text-base text-white [color-scheme:dark] sm:min-h-0 sm:w-auto sm:min-w-[11rem] sm:text-sm"
+            type="date"
+            value={selectedDate}
+            onChange={(event) => onDateChange(event.target.value)}
+            onClick={openDatePicker}
+          />
         </label>
-        <div className="text-left sm:text-right">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Timezone</p>
-          <p className="break-all text-sm text-slate-200 sm:break-normal">{timeZone}</p>
-        </div>
       </div>
 
       <div className="relative flex min-w-0 flex-col overflow-x-clip pt-4 sm:pt-9">

@@ -175,7 +175,6 @@ function App() {
             selectedMinute={effectiveMinute}
             onDateChange={setSelectedDate}
             onMinuteChange={setSelectedMinute}
-            timeZone={TIME_ZONE}
             minMinute={sliderBounds.minMinute}
             maxMinute={sliderBounds.maxMinute}
           />
