@@ -17,3 +17,47 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/*
+ * Mobile Safari / Chrome: appearance-none strips native range styling; without
+ * -webkit-slider-* / -moz-range-* the track can render with zero visible height.
+ */
+@layer components {
+  .time-range-input {
+    @apply relative z-30 w-full cursor-pointer appearance-none bg-transparent;
+    min-height: 2.75rem;
+  }
+
+  .time-range-input::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.2);
+  }
+
+  .time-range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    border: none;
+    background: rgb(var(--lane-open));
+    margin-top: -0.375rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+  }
+
+  .time-range-input::-moz-range-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.2);
+  }
+
+  .time-range-input::-moz-range-thumb {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    border: none;
+    background: rgb(var(--lane-open));
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+  }
+}

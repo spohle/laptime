@@ -24,7 +24,7 @@ function ThemeToggle() {
 
   return (
     <div
-      className="flex flex-col items-end gap-1"
+      className="flex flex-col items-end gap-1 self-end"
       role="group"
       aria-label="Color theme"
     >
@@ -33,7 +33,7 @@ function ThemeToggle() {
         <button
           type="button"
           onClick={() => setTheme('default')}
-          className={`rounded px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-colors ${
+          className={`min-h-10 rounded px-3 py-2 text-[11px] font-bold uppercase tracking-wide transition-colors sm:min-h-0 sm:py-1.5 ${
             theme === 'default'
               ? 'bg-slateCard text-white shadow-sm'
               : 'text-slate-400 hover:text-slate-200'
@@ -44,7 +44,7 @@ function ThemeToggle() {
         <button
           type="button"
           onClick={() => setTheme('amber')}
-          className={`rounded px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-colors ${
+          className={`min-h-10 rounded px-3 py-2 text-[11px] font-bold uppercase tracking-wide transition-colors sm:min-h-0 sm:py-1.5 ${
             theme === 'amber'
               ? 'bg-slateCard text-laneOpen shadow-sm'
               : 'text-slate-400 hover:text-slate-200'

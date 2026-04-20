@@ -7,9 +7,9 @@ const LEGEND = [
 
 function LaneLegend() {
   return (
-    <div className="mt-5 flex flex-wrap items-center gap-3">
+    <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-5 sm:gap-3">
       {LEGEND.map((item) => (
-        <div key={item.key} className="flex items-center gap-2 text-xs text-slate-100">
+        <div key={item.key} className="flex min-w-0 items-center gap-2 text-[10px] text-slate-100 sm:text-xs">
           <span className={`inline-block h-4 w-4 rounded-sm ${item.swatch}`} />
           <span>{item.label}</span>
         </div>

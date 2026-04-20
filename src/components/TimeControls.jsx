@@ -54,14 +54,14 @@ function TimeControls({
   }
 
   return (
-    <section className="mt-6 border border-white/10 bg-slateDeep/70 p-4">
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-4">
-        <label className="flex flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-slate-200">
+    <section className="border border-white/10 bg-slateDeep/70 p-3 sm:p-4">
+      <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-slate-200">
           Date
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               ref={dateInputRef}
-              className="border border-white/20 bg-black/20 px-3 py-2 text-sm text-white"
+              className="min-h-11 w-full min-w-0 rounded border border-white/25 bg-slate-900/90 px-3 py-2 text-base text-white [color-scheme:dark] sm:min-h-0 sm:w-auto sm:min-w-[11rem] sm:text-sm"
               type="date"
               value={selectedDate}
               onChange={(event) => onDateChange(event.target.value)}
@@ -69,19 +69,19 @@ function TimeControls({
             <button
               type="button"
               onClick={openDatePicker}
-              className="border border-white/20 bg-black/20 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-100"
+              className="min-h-11 shrink-0 rounded border border-white/20 bg-black/20 px-4 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-100 sm:min-h-0 sm:px-3"
             >
               Pick
             </button>
           </div>
         </label>
-        <div className="text-right">
+        <div className="text-left sm:text-right">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Timezone</p>
-          <p className="text-sm text-slate-200">{timeZone}</p>
+          <p className="break-all text-sm text-slate-200 sm:break-normal">{timeZone}</p>
         </div>
       </div>
 
-      <div className="relative flex flex-col pt-9">
+      <div className="relative flex flex-col pt-8 sm:pt-9">
         {showNowLine ? (
           <div
             className="pointer-events-none absolute bottom-0 left-0 top-0 z-[5] w-[2px] -translate-x-1/2 bg-red-500"
@@ -94,20 +94,22 @@ function TimeControls({
           style={{ left: `${thumbPercent}%` }}
           aria-hidden
         >
-          <span className="inline-block border border-laneOpen/60 bg-slate-950/95 px-2 py-1 text-sm font-bold text-laneOpen shadow-md">
+          <span className="inline-block max-w-[min(calc(100vw-2.5rem),14rem)] truncate border border-laneOpen/60 bg-slate-950/95 px-2 py-1 text-center text-xs font-bold text-laneOpen shadow-md sm:max-w-none sm:text-sm">
             {formatMinuteLabel(selectedMinute)}
           </span>
         </div>
-        <input
-          type="range"
-          min={minMinute}
-          max={maxMinute}
-          step="5"
-          value={selectedMinute}
-          onChange={handleSliderChange}
-          onInput={handleSliderChange}
-          className="relative z-0 mt-1 h-2 w-full cursor-pointer appearance-none bg-white/20 accent-laneOpen"
-        />
+        <div className="relative z-30 px-0.5 py-2 sm:py-0">
+          <input
+            type="range"
+            min={minMinute}
+            max={maxMinute}
+            step="5"
+            value={selectedMinute}
+            onChange={handleSliderChange}
+            onInput={handleSliderChange}
+            className="time-range-input"
+          />
+        </div>
         <div className="mt-2 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-slate-300">
           <span>{formatMinuteLabel(minMinute)}</span>
           <span>{formatMinuteLabel(maxMinute)}</span>

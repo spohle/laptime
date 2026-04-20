@@ -6,6 +6,7 @@
  * Amber ≈ second reference (tile accents: #F4A358 amber, #B584F5 purple, #FF9F59 orange, #26282E inactive).
  */
 html {
+  color-scheme: dark;
   --page-base: 10 17 29;
   --glow-spot-1: 182 136 255 / 0.12;
   --glow-spot-2: 244 198 78 / 0.1;
