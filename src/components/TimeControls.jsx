@@ -27,12 +27,12 @@ function TimeControls({
   }
 
   return (
-    <section className="min-w-0 border border-white/10 bg-slateDeep/70 p-3 sm:p-4">
+    <section className="min-w-0 bg-slateDeep/70 p-3 sm:p-4">
       <div className="mb-3">
-        <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-slate-200">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-uiMuted">
           Date
           <input
-            className="min-h-11 w-full min-w-0 cursor-pointer rounded border border-white/25 bg-slate-900/90 px-3 py-2 text-base text-white [color-scheme:dark] sm:min-h-0 sm:w-auto sm:min-w-[11rem] sm:text-sm"
+            className="min-h-11 w-full min-w-0 cursor-pointer rounded bg-uiInput/90 px-3 py-2 text-base text-uiHeading sm:min-h-0 sm:w-auto sm:min-w-[11rem] sm:text-sm"
             type="date"
             value={selectedDate}
             onChange={(event) => onDateChange(event.target.value)}
@@ -47,7 +47,7 @@ function TimeControls({
           style={{ left: `${thumbPercent}%` }}
           aria-hidden
         >
-          <span className="inline-block max-w-[14rem] truncate border border-laneOpen/60 bg-slate-950/95 px-1.5 py-0.5 text-center text-[10px] font-bold leading-tight text-laneOpen shadow-md sm:max-w-none sm:px-2 sm:py-1 sm:text-sm">
+          <span className="inline-block max-w-[14rem] truncate bg-uiElevated/95 px-1.5 py-0.5 text-center text-[10px] font-bold leading-tight text-laneOpen shadow-md sm:max-w-none sm:px-2 sm:py-1 sm:text-sm">
             {formatMinuteLabel(selectedMinute)}
           </span>
         </div>
@@ -63,7 +63,7 @@ function TimeControls({
             className="time-range-input"
           />
         </div>
-        <div className="mt-1 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-slate-300 sm:mt-2">
+        <div className="mt-1 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-uiMuted sm:mt-2">
           <span>{formatMinuteLabel(minMinute)}</span>
           <span>{formatMinuteLabel(maxMinute)}</span>
         </div>

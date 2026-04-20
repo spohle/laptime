@@ -7,7 +7,7 @@ import App from './App.jsx'
 try {
   const stored = window.localStorage.getItem('laptime-theme')
   document.documentElement.dataset.theme =
-    stored === 'amber' || stored === 'default' ? stored : 'default'
+    stored === 'amber' || stored === 'default' || stored === 'light' ? stored : 'default'
 } catch {
   /* ignore */
 }

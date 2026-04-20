@@ -156,18 +156,18 @@ function App() {
       <header className="mb-4 sm:mb-6">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center justify-between gap-3">
-            <p className="min-w-0 truncate text-xs uppercase tracking-[0.25em] text-slate-300 sm:text-sm">
+            <p className="min-w-0 truncate text-xs uppercase tracking-[0.25em] text-uiMuted sm:text-sm">
               Rose Bowl Aquatics
             </p>
             <ThemeToggle />
           </div>
-          <h1 className="mt-1 text-2xl font-black uppercase tracking-wide text-white sm:mt-2 sm:text-4xl md:text-5xl">
+          <h1 className="mt-1 text-2xl font-black uppercase tracking-wide text-uiHeading sm:mt-2 sm:text-4xl md:text-5xl">
             Lane Visualizer
           </h1>
         </div>
       </header>
 
-      <section className="flex min-w-0 flex-col gap-4 border border-white/10 bg-slateCard/70 p-3 shadow-glow backdrop-blur sm:p-4 md:gap-6 md:p-6">
+      <section className="flex min-w-0 flex-col gap-4 bg-slateCard/70 p-3 shadow-glow backdrop-blur sm:p-4 md:gap-6 md:p-6">
         {/* Mobile: date/time first (below the fold otherwise). md+: pools first like desktop. */}
         <div className="order-1 min-w-0 md:order-2">
           <TimeControls

@@ -24,14 +24,15 @@ function ThemeToggle() {
 
   return (
     <label className="flex shrink-0 items-center gap-2">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Theme</span>
+      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-uiSoft">Theme</span>
       <select
         value={theme}
         onChange={(event) => setTheme(event.target.value)}
-        className="min-h-9 min-w-[7.5rem] cursor-pointer rounded border border-white/20 bg-slate-900/90 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-100 [color-scheme:dark] sm:min-h-0"
+        className="min-h-9 min-w-[9.5rem] cursor-pointer rounded bg-uiInput/95 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wide text-uiBody sm:min-h-0"
       >
         <option value="default">Default</option>
         <option value="amber">Amber</option>
+        <option value="light">Light</option>
       </select>
     </label>
   )
