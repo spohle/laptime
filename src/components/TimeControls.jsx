@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { formatMinuteLabel, getNowInZone } from '../lib/timezone'
+import { useMemo, useRef } from 'react'
+import { formatMinuteLabel } from '../lib/timezone'
 
 function TimeControls({
   selectedDate,
@@ -11,34 +11,11 @@ function TimeControls({
   maxMinute,
 }) {
   const dateInputRef = useRef(null)
-  const [clockTick, setClockTick] = useState(0)
-
-  useEffect(() => {
-    const id = setInterval(() => setClockTick((n) => n + 1), 30_000)
-    return () => clearInterval(id)
-  }, [])
-
-  // clockTick forces periodic refresh of wall-clock "now" for the red marker
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- clockTick
-  const nowInZone = useMemo(() => getNowInZone(timeZone), [timeZone, clockTick])
 
   const thumbPercent = useMemo(() => {
     if (maxMinute <= minMinute) return 0
     return ((selectedMinute - minMinute) / (maxMinute - minMinute)) * 100
   }, [selectedMinute, minMinute, maxMinute])
-
-  const { showNowLine, nowLinePercent } = useMemo(() => {
-    const isToday = selectedDate === nowInZone.date
-    const m = nowInZone.minutes
-    const inRange = m >= minMinute && m <= maxMinute
-    if (!isToday || !inRange || maxMinute <= minMinute) {
-      return { showNowLine: false, nowLinePercent: 0 }
-    }
-    return {
-      showNowLine: true,
-      nowLinePercent: ((m - minMinute) / (maxMinute - minMinute)) * 100,
-    }
-  }, [selectedDate, nowInZone.date, nowInZone.minutes, minMinute, maxMinute])
 
   const handleSliderChange = (event) => {
     onMinuteChange(Number(event.target.value))
@@ -54,7 +31,7 @@ function TimeControls({
   }
 
   return (
-    <section className="border border-white/10 bg-slateDeep/70 p-3 sm:p-4">
+    <section className="min-w-0 border border-white/10 bg-slateDeep/70 p-3 sm:p-4">
       <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
         <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-slate-200">
           Date
@@ -81,24 +58,17 @@ function TimeControls({
         </div>
       </div>
 
-      <div className="relative flex flex-col pt-8 sm:pt-9">
-        {showNowLine ? (
-          <div
-            className="pointer-events-none absolute bottom-0 left-0 top-0 z-[5] w-[2px] -translate-x-1/2 bg-red-500"
-            style={{ left: `${nowLinePercent}%` }}
-            aria-hidden
-          />
-        ) : null}
+      <div className="relative flex min-w-0 flex-col overflow-x-clip pt-4 sm:pt-9">
         <div
-          className="pointer-events-none absolute left-0 top-0 z-10 -translate-x-1/2 whitespace-nowrap"
+          className="pointer-events-none absolute left-0 top-0 z-10 max-w-full -translate-x-1/2"
           style={{ left: `${thumbPercent}%` }}
           aria-hidden
         >
-          <span className="inline-block max-w-[min(calc(100vw-2.5rem),14rem)] truncate border border-laneOpen/60 bg-slate-950/95 px-2 py-1 text-center text-xs font-bold text-laneOpen shadow-md sm:max-w-none sm:text-sm">
+          <span className="inline-block max-w-[14rem] truncate border border-laneOpen/60 bg-slate-950/95 px-1.5 py-0.5 text-center text-[10px] font-bold leading-tight text-laneOpen shadow-md sm:max-w-none sm:px-2 sm:py-1 sm:text-sm">
             {formatMinuteLabel(selectedMinute)}
           </span>
         </div>
-        <div className="relative z-30 px-0.5 py-2 sm:py-0">
+        <div className="relative z-30 px-0.5 py-1 sm:py-0">
           <input
             type="range"
             min={minMinute}
@@ -110,7 +80,7 @@ function TimeControls({
             className="time-range-input"
           />
         </div>
-        <div className="mt-2 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-slate-300">
+        <div className="mt-1 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-slate-300 sm:mt-2">
           <span>{formatMinuteLabel(minMinute)}</span>
           <span>{formatMinuteLabel(maxMinute)}</span>
         </div>

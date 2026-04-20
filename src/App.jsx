@@ -152,20 +152,24 @@ function App() {
   const compLayout = compLaneCount === 20 ? 'strip20' : 'stack9'
 
   return (
-    <main className="mx-auto w-full max-w-6xl pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-4 sm:pl-4 sm:pr-4 sm:py-6 md:py-8">
-      <header className="mb-4 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
+    <main className="mx-auto min-w-0 w-full max-w-6xl pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-4 sm:pl-4 sm:pr-4 sm:py-6 md:py-8">
+      <header className="mb-4 sm:mb-6">
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-300 sm:text-sm">Rose Bowl Aquatics</p>
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <p className="min-w-0 truncate text-xs uppercase tracking-[0.25em] text-slate-300 sm:text-sm">
+              Rose Bowl Aquatics
+            </p>
+            <ThemeToggle />
+          </div>
           <h1 className="mt-1 text-2xl font-black uppercase tracking-wide text-white sm:mt-2 sm:text-4xl md:text-5xl">
             Lane Visualizer
           </h1>
         </div>
-        <ThemeToggle />
       </header>
 
-      <section className="flex flex-col gap-4 border border-white/10 bg-slateCard/70 p-3 shadow-glow backdrop-blur sm:p-4 md:gap-6 md:p-6">
+      <section className="flex min-w-0 flex-col gap-4 border border-white/10 bg-slateCard/70 p-3 shadow-glow backdrop-blur sm:p-4 md:gap-6 md:p-6">
         {/* Mobile: date/time first (below the fold otherwise). md+: pools first like desktop. */}
-        <div className="order-1 md:order-2">
+        <div className="order-1 min-w-0 md:order-2">
           <TimeControls
             selectedDate={selectedDate}
             selectedMinute={effectiveMinute}
@@ -176,7 +180,7 @@ function App() {
             maxMinute={sliderBounds.maxMinute}
           />
         </div>
-        <div className="order-2 flex flex-col md:order-1">
+        <div className="order-2 flex min-w-0 flex-col md:order-1">
           <PoolLanes lanes={recLaneStates} isLoading={isLoadingRec} timeZone={TIME_ZONE} title="RecPool Status" />
           <LaneLegend />
           <CompPoolLanes

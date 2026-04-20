@@ -23,37 +23,17 @@ function ThemeToggle() {
   }, [theme])
 
   return (
-    <div
-      className="flex flex-col items-end gap-1 self-end"
-      role="group"
-      aria-label="Color theme"
-    >
+    <label className="flex shrink-0 items-center gap-2">
       <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Theme</span>
-      <div className="inline-flex rounded-md border border-white/15 bg-black/25 p-0.5">
-        <button
-          type="button"
-          onClick={() => setTheme('default')}
-          className={`min-h-10 rounded px-3 py-2 text-[11px] font-bold uppercase tracking-wide transition-colors sm:min-h-0 sm:py-1.5 ${
-            theme === 'default'
-              ? 'bg-slateCard text-white shadow-sm'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          Default
-        </button>
-        <button
-          type="button"
-          onClick={() => setTheme('amber')}
-          className={`min-h-10 rounded px-3 py-2 text-[11px] font-bold uppercase tracking-wide transition-colors sm:min-h-0 sm:py-1.5 ${
-            theme === 'amber'
-              ? 'bg-slateCard text-laneOpen shadow-sm'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          Amber
-        </button>
-      </div>
-    </div>
+      <select
+        value={theme}
+        onChange={(event) => setTheme(event.target.value)}
+        className="min-h-9 min-w-[7.5rem] cursor-pointer rounded border border-white/20 bg-slate-900/90 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-100 [color-scheme:dark] sm:min-h-0"
+      >
+        <option value="default">Default</option>
+        <option value="amber">Amber</option>
+      </select>
+    </label>
   )
 }
 
