@@ -35,6 +35,20 @@ describe('normalizeEvents', () => {
     expect(event.priority).toBe(4)
   })
 
+  it('parses "N lanes LC" as lanes 1 through N', () => {
+    const [event] = normalizeEvents([
+      {
+        id: '4',
+        summary: 'General Lap Swim - 8 lanes LC',
+        description: '',
+        startMs: 0,
+        endMs: 1,
+      },
+    ])
+
+    expect(event.laneRanges).toEqual([{ start: 1, end: 8 }])
+  })
+
   it('prefers summary lane range over conflicting description lane range', () => {
     const [event] = normalizeEvents([
       {

@@ -1,19 +1,32 @@
 import ICAL from 'ical.js'
 import { normalizeEvents } from './normalizeEvents'
 
-const CALENDAR_ID = 'rosebowlaquatics.org_4le4udubed0tu4u9vn4ha1bcs8@group.calendar.google.com'
-const ICS_URL = `https://calendar.google.com/calendar/ical/${encodeURIComponent(CALENDAR_ID)}/public/basic.ics`
+export const REC_POOL_CALENDAR_ID = 'rosebowlaquatics.org_4le4udubed0tu4u9vn4ha1bcs8@group.calendar.google.com'
+export const COMPETITION_POOL_CALENDAR_ID = 'rosebowlaquatics.org_ov4u9q0a65cnor15e71ftmpn4c@group.calendar.google.com'
 
-const FALLBACK_FETCH_URLS = [
-  '/api/calendar-ics',
-  ICS_URL,
-  `https://api.allorigins.win/raw?url=${encodeURIComponent(ICS_URL)}`,
-]
+function icsUrlForCalendarId(calendarId) {
+  return `https://calendar.google.com/calendar/ical/${encodeURIComponent(calendarId)}/public/basic.ics`
+}
 
-async function fetchIcsText() {
+function fallbackFetchUrlsForCalendar(calendarId) {
+  const icsUrl = icsUrlForCalendarId(calendarId)
+  const proxyPath =
+    calendarId === REC_POOL_CALENDAR_ID
+      ? '/api/calendar-ics'
+      : calendarId === COMPETITION_POOL_CALENDAR_ID
+        ? '/api/calendar-ics-competition'
+        : null
+
+  const urls = []
+  if (proxyPath) urls.push(proxyPath)
+  urls.push(icsUrl, `https://api.allorigins.win/raw?url=${encodeURIComponent(icsUrl)}`)
+  return urls
+}
+
+async function fetchIcsTextForCalendar(calendarId) {
   const errors = []
 
-  for (const url of FALLBACK_FETCH_URLS) {
+  for (const url of fallbackFetchUrlsForCalendar(calendarId)) {
     try {
       const response = await fetch(url)
       if (!response.ok) {
@@ -91,8 +104,8 @@ function collectCalendarEvents(vevents) {
   return expanded
 }
 
-export async function fetchCalendarEvents() {
-  const icsText = await fetchIcsText()
+export async function fetchCalendarEventsForCalendarId(calendarId) {
+  const icsText = await fetchIcsTextForCalendar(calendarId)
   const jCalData = ICAL.parse(icsText)
   const calendar = new ICAL.Component(jCalData)
   const vevents = calendar.getAllSubcomponents('vevent')
@@ -102,4 +115,17 @@ export async function fetchCalendarEvents() {
     ...event,
     lanes: expandLaneRanges(event),
   }))
+}
+
+export async function fetchRecPoolEvents() {
+  return fetchCalendarEventsForCalendarId(REC_POOL_CALENDAR_ID)
+}
+
+export async function fetchCompetitionPoolEvents() {
+  return fetchCalendarEventsForCalendarId(COMPETITION_POOL_CALENDAR_ID)
+}
+
+/** @deprecated use fetchRecPoolEvents */
+export async function fetchCalendarEvents() {
+  return fetchRecPoolEvents()
 }

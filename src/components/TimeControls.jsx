@@ -7,8 +7,6 @@ function TimeControls({
   onDateChange,
   onMinuteChange,
   timeZone,
-  minDate,
-  maxDate,
   minMinute,
   maxMinute,
 }) {
@@ -20,6 +18,8 @@ function TimeControls({
     return () => clearInterval(id)
   }, [])
 
+  // clockTick forces periodic refresh of wall-clock "now" for the red marker
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- clockTick
   const nowInZone = useMemo(() => getNowInZone(timeZone), [timeZone, clockTick])
 
   const thumbPercent = useMemo(() => {
@@ -64,10 +64,6 @@ function TimeControls({
               className="border border-white/20 bg-black/20 px-3 py-2 text-sm text-white"
               type="date"
               value={selectedDate}
-              min={minDate || undefined}
-              max={maxDate || undefined}
-              onClick={openDatePicker}
-              onFocus={openDatePicker}
               onChange={(event) => onDateChange(event.target.value)}
             />
             <button

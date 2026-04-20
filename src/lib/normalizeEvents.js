@@ -37,6 +37,15 @@ function parseLaneRanges(text) {
     ranges.push({ start: lane, end: lane })
   }
 
+  // "General Lap Swim - 8 lanes LC", "4 lanes", "20 lanes SCY" → lanes 1..N
+  const countLanesPattern = /\b(\d{1,2})\s*lanes?\b/gi
+  for (const match of source.matchAll(countLanesPattern)) {
+    const n = clampLane(Number(match[1]))
+    if (n >= 1) {
+      ranges.push({ start: 1, end: n })
+    }
+  }
+
   return ranges
 }
 

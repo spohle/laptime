@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
+import CompPoolLanes from './components/CompPoolLanes'
 import LaneLegend from './components/LaneLegend'
 import PoolLanes from './components/PoolLanes'
 import TimeControls from './components/TimeControls'
-import { fetchCalendarEvents } from './lib/calendarClient'
+import { fetchCompetitionPoolEvents, fetchRecPoolEvents } from './lib/calendarClient'
+import { getCompPoolLaneCountAtTime } from './lib/compPoolLayout'
 import { resolveLaneStates } from './lib/resolveLaneStates'
 import { getNowInZone, utcMsToZoneDateMinute } from './lib/timezone'
 
@@ -13,91 +15,140 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value))
 }
 
+function sliderBoundsFromEvents(events, selectedDate, timeZone) {
+  const overlaps = []
+
+  events.forEach((event) => {
+    const start = utcMsToZoneDateMinute(event.startMs, timeZone)
+    const end = utcMsToZoneDateMinute(Math.max(event.endMs - 1, event.startMs), timeZone)
+
+    if (selectedDate < start.date || selectedDate > end.date) {
+      return
+    }
+
+    const minMinute = selectedDate === start.date ? start.minute : 0
+    const maxMinute = selectedDate === end.date ? end.minute : 1439
+    overlaps.push({ minMinute, maxMinute })
+  })
+
+  if (overlaps.length === 0) {
+    return { minMinute: 0, maxMinute: 1435 }
+  }
+
+  const rawMin = Math.min(...overlaps.map((item) => item.minMinute))
+  const rawMax = Math.max(...overlaps.map((item) => item.maxMinute))
+  const minMinute = clamp(Math.floor(rawMin / SLIDER_STEP) * SLIDER_STEP, 0, 1435)
+  const maxMinute = clamp(Math.ceil(rawMax / SLIDER_STEP) * SLIDER_STEP, minMinute + SLIDER_STEP, 1435)
+  return { minMinute, maxMinute }
+}
+
 function App() {
   const now = useMemo(() => getNowInZone(TIME_ZONE), [])
   const [selectedDate, setSelectedDate] = useState(now.date)
   const [selectedMinute, setSelectedMinute] = useState(now.minutes)
-  const [events, setEvents] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [recEvents, setRecEvents] = useState([])
+  const [compEvents, setCompEvents] = useState([])
+  const [isLoadingRec, setIsLoadingRec] = useState(true)
+  const [isLoadingComp, setIsLoadingComp] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
+    let cancelled = false
+
     async function loadEvents() {
-      try {
-        setIsLoading(true)
-        setError('')
-        const nextEvents = await fetchCalendarEvents()
-        setEvents(nextEvents)
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load lane schedule.')
-      } finally {
-        setIsLoading(false)
-      }
-    }
+      setIsLoadingRec(true)
+      setIsLoadingComp(true)
+      setError('')
 
-    void loadEvents()
-  }, [])
+      const results = await Promise.allSettled([fetchRecPoolEvents(), fetchCompetitionPoolEvents()])
 
-  const laneStates = useMemo(
-    () =>
-      resolveLaneStates({
-        events,
-        selectedDate,
-        selectedMinute,
-        laneCount: 20,
-        timeZone: TIME_ZONE,
-      }),
-    [events, selectedDate, selectedMinute],
-  )
-
-  const dateBounds = useMemo(() => {
-    if (events.length === 0) {
-      return { minDate: '', maxDate: '' }
-    }
-
-    let minDate = '9999-12-31'
-    let maxDate = '0000-01-01'
-
-    events.forEach((event) => {
-      const startDate = utcMsToZoneDateMinute(event.startMs, TIME_ZONE).date
-      const endDate = utcMsToZoneDateMinute(Math.max(event.endMs - 1, event.startMs), TIME_ZONE).date
-      if (startDate < minDate) minDate = startDate
-      if (endDate > maxDate) maxDate = endDate
-    })
-
-    return { minDate, maxDate }
-  }, [events])
-
-  const sliderBounds = useMemo(() => {
-    const overlaps = []
-
-    events.forEach((event) => {
-      const start = utcMsToZoneDateMinute(event.startMs, TIME_ZONE)
-      const end = utcMsToZoneDateMinute(Math.max(event.endMs - 1, event.startMs), TIME_ZONE)
-
-      if (selectedDate < start.date || selectedDate > end.date) {
+      if (cancelled) {
         return
       }
 
-      const minMinute = selectedDate === start.date ? start.minute : 0
-      const maxMinute = selectedDate === end.date ? end.minute : 1439
-      overlaps.push({ minMinute, maxMinute })
-    })
+      if (results[0].status === 'fulfilled') {
+        setRecEvents(results[0].value)
+      } else {
+        setRecEvents([])
+      }
 
-    if (overlaps.length === 0) {
-      return { minMinute: 0, maxMinute: 1435 }
+      if (results[1].status === 'fulfilled') {
+        setCompEvents(results[1].value)
+      } else {
+        setCompEvents([])
+      }
+
+      const errs = []
+      if (results[0].status === 'rejected') {
+        errs.push(
+          `Rec pool: ${results[0].reason instanceof Error ? results[0].reason.message : String(results[0].reason)}`,
+        )
+      }
+      if (results[1].status === 'rejected') {
+        errs.push(
+          `Competition pool: ${results[1].reason instanceof Error ? results[1].reason.message : String(results[1].reason)}`,
+        )
+      }
+      setError(errs.join('\n'))
+
+      setIsLoadingRec(false)
+      setIsLoadingComp(false)
     }
 
-    const rawMin = Math.min(...overlaps.map((item) => item.minMinute))
-    const rawMax = Math.max(...overlaps.map((item) => item.maxMinute))
-    const minMinute = clamp(Math.floor(rawMin / SLIDER_STEP) * SLIDER_STEP, 0, 1435)
-    const maxMinute = clamp(Math.ceil(rawMax / SLIDER_STEP) * SLIDER_STEP, minMinute + SLIDER_STEP, 1435)
-    return { minMinute, maxMinute }
-  }, [events, selectedDate])
+    void loadEvents()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  useEffect(() => {
-    setSelectedMinute((minute) => clamp(minute, sliderBounds.minMinute, sliderBounds.maxMinute))
-  }, [sliderBounds.maxMinute, sliderBounds.minMinute])
+  const mergedEvents = useMemo(() => [...recEvents, ...compEvents], [recEvents, compEvents])
+
+  const sliderBounds = useMemo(
+    () => sliderBoundsFromEvents(mergedEvents, selectedDate, TIME_ZONE),
+    [mergedEvents, selectedDate],
+  )
+
+  const effectiveMinute = useMemo(
+    () => clamp(selectedMinute, sliderBounds.minMinute, sliderBounds.maxMinute),
+    [selectedMinute, sliderBounds.minMinute, sliderBounds.maxMinute],
+  )
+
+  const recLaneStates = useMemo(
+    () =>
+      resolveLaneStates({
+        events: recEvents,
+        selectedDate,
+        selectedMinute: effectiveMinute,
+        laneCount: 20,
+        timeZone: TIME_ZONE,
+      }),
+    [recEvents, selectedDate, effectiveMinute],
+  )
+
+  const compLaneCount = useMemo(
+    () =>
+      getCompPoolLaneCountAtTime({
+        events: compEvents,
+        selectedDate,
+        selectedMinute: effectiveMinute,
+        timeZone: TIME_ZONE,
+      }),
+    [compEvents, selectedDate, effectiveMinute],
+  )
+
+  const compLaneStates = useMemo(
+    () =>
+      resolveLaneStates({
+        events: compEvents,
+        selectedDate,
+        selectedMinute: effectiveMinute,
+        laneCount: compLaneCount,
+        timeZone: TIME_ZONE,
+      }),
+    [compEvents, selectedDate, effectiveMinute, compLaneCount],
+  )
+
+  const compLayout = compLaneCount === 20 ? 'strip20' : 'stack9'
 
   return (
     <main className="mx-auto w-[90%] max-w-none py-8">
@@ -107,23 +158,29 @@ function App() {
       </header>
 
       <section className="border border-white/10 bg-slateCard/70 p-4 shadow-glow backdrop-blur md:p-6">
-        <PoolLanes lanes={laneStates} isLoading={isLoading} timeZone={TIME_ZONE} />
+        <PoolLanes lanes={recLaneStates} isLoading={isLoadingRec} timeZone={TIME_ZONE} title="RecPool Status" />
         <LaneLegend />
+        <CompPoolLanes
+          lanes={compLaneStates}
+          isLoading={isLoadingComp}
+          timeZone={TIME_ZONE}
+          layout={compLayout}
+        />
         <TimeControls
           selectedDate={selectedDate}
-          selectedMinute={selectedMinute}
+          selectedMinute={effectiveMinute}
           onDateChange={setSelectedDate}
           onMinuteChange={setSelectedMinute}
           timeZone={TIME_ZONE}
-          minDate={dateBounds.minDate}
-          maxDate={dateBounds.maxDate}
           minMinute={sliderBounds.minMinute}
           maxMinute={sliderBounds.maxMinute}
         />
       </section>
 
       {error ? (
-        <p className="mt-4 border border-red-400/40 bg-red-400/15 px-4 py-3 text-sm text-red-200">{error}</p>
+        <p className="mt-4 whitespace-pre-wrap border border-red-400/40 bg-red-400/15 px-4 py-3 text-sm text-red-200">
+          {error}
+        </p>
       ) : null}
     </main>
   )

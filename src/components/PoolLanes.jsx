@@ -12,11 +12,11 @@ function formatLaneOpenUntil(endMs, timeZone) {
   }).format(new Date(endMs))
 }
 
-function PoolLanes({ lanes, isLoading, timeZone }) {
+function PoolLanes({ lanes, isLoading, timeZone, title = 'RecPool Status' }) {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white md:text-xl">RecPool Status</h2>
+        <h2 className="text-lg font-semibold text-white md:text-xl">{title}</h2>
       </div>
 
       <div className="relative pb-2">

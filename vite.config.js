@@ -1,17 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const CALENDAR_ID = 'rosebowlaquatics.org_4le4udubed0tu4u9vn4ha1bcs8@group.calendar.google.com'
-const GOOGLE_ICS_URL = `https://calendar.google.com/calendar/ical/${encodeURIComponent(CALENDAR_ID)}/public/basic.ics`
+const CALENDARS = {
+  '/api/calendar-ics':
+    'https://calendar.google.com/calendar/ical/rosebowlaquatics.org_4le4udubed0tu4u9vn4ha1bcs8%40group.calendar.google.com/public/basic.ics',
+  '/api/calendar-ics-competition':
+    'https://calendar.google.com/calendar/ical/rosebowlaquatics.org_ov4u9q0a65cnor15e71ftmpn4c%40group.calendar.google.com/public/basic.ics',
+}
 
 function calendarProxyPlugin() {
   async function handler(req, res) {
-    if (!req.url?.startsWith('/api/calendar-ics')) {
+    const path = req.url?.split('?')[0] ?? ''
+    const googleUrl = CALENDARS[path]
+    if (!googleUrl) {
       return false
     }
 
     try {
-      const response = await fetch(GOOGLE_ICS_URL)
+      const response = await fetch(googleUrl)
       if (!response.ok) {
         throw new Error(`Google ICS request failed with ${response.status}`)
       }
