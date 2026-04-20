@@ -6,6 +6,7 @@ import ThemeToggle from './components/ThemeToggle'
 import TimeControls from './components/TimeControls'
 import { fetchCompetitionPoolEvents, fetchRecPoolEvents } from './lib/calendarClient'
 import { getCompPoolLaneCountAtTime } from './lib/compPoolLayout'
+import { findBestRecPoolLapSwimWindow, formatBestRecPoolLapSwimLine } from './lib/recPoolBestWindow'
 import { resolveLaneStates } from './lib/resolveLaneStates'
 import { getNowInZone, utcMsToZoneDateMinute } from './lib/timezone'
 
@@ -126,6 +127,19 @@ function App() {
     [recEvents, selectedDate, effectiveMinute],
   )
 
+  const recPeakLapSwimLine = useMemo(() => {
+    if (isLoadingRec) {
+      return ''
+    }
+    const bestWindow = findBestRecPoolLapSwimWindow({
+      events: recEvents,
+      selectedDate,
+      laneCount: 20,
+      timeZone: TIME_ZONE,
+    })
+    return formatBestRecPoolLapSwimLine(bestWindow, TIME_ZONE) ?? ''
+  }, [recEvents, selectedDate, isLoadingRec])
+
   const compLaneCount = useMemo(
     () =>
       getCompPoolLaneCountAtTime({
@@ -161,9 +175,6 @@ function App() {
             </p>
             <ThemeToggle />
           </div>
-          <h1 className="mt-1 text-2xl font-black uppercase tracking-wide text-uiHeading sm:mt-2 sm:text-4xl md:text-5xl">
-            Lane Visualizer
-          </h1>
         </div>
       </header>
 
@@ -180,7 +191,13 @@ function App() {
           />
         </div>
         <div className="order-2 flex min-w-0 flex-col md:order-1">
-          <PoolLanes lanes={recLaneStates} isLoading={isLoadingRec} timeZone={TIME_ZONE} title="RecPool Status" />
+          <PoolLanes
+            lanes={recLaneStates}
+            isLoading={isLoadingRec}
+            timeZone={TIME_ZONE}
+            title="RecPool Status"
+            summaryLine={recPeakLapSwimLine}
+          />
           <LaneLegend />
           <CompPoolLanes
             lanes={compLaneStates}

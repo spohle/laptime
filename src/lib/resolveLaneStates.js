@@ -24,6 +24,24 @@ function compareOverlappingEvents(left, right) {
   return right.endMs - left.endMs
 }
 
+/** Lap swim lanes at instant `utcMs` (same overlap rules as the lane grid). */
+export function lapSwimLaneCountAtMs({ events, utcMs, laneCount }) {
+  const activeEvents = events.filter((event) => utcMs >= event.startMs && utcMs < event.endMs)
+  let lapSwimLaneTotal = 0
+
+  for (let lane = 1; lane <= laneCount; lane += 1) {
+    const winningEvent = activeEvents
+      .filter((event) => event.lanes.includes(lane))
+      .sort(compareOverlappingEvents)[0]
+
+    if (winningEvent?.state === 'open') {
+      lapSwimLaneTotal += 1
+    }
+  }
+
+  return lapSwimLaneTotal
+}
+
 export function resolveLaneStates({ events, selectedDate, selectedMinute, laneCount, timeZone }) {
   const selectedUtcMs = zoneDateMinuteToUtcMs(selectedDate, selectedMinute, timeZone)
   const activeEvents = events.filter((event) => selectedUtcMs >= event.startMs && selectedUtcMs < event.endMs)

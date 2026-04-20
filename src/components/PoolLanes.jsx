@@ -12,7 +12,7 @@ function formatLaneOpenUntil(endMs, timeZone) {
   }).format(new Date(endMs))
 }
 
-function PoolLanes({ lanes, isLoading, timeZone, title = 'RecPool Status' }) {
+function PoolLanes({ lanes, isLoading, timeZone, title = 'RecPool Status', summaryLine = '' }) {
   return (
     <div className="min-w-0">
       <div className="mb-2 flex items-center justify-between sm:mb-3">
@@ -56,6 +56,9 @@ function PoolLanes({ lanes, isLoading, timeZone, title = 'RecPool Status' }) {
             )
           })}
         </div>
+        {summaryLine ? (
+          <p className="mt-2 text-sm leading-snug text-uiBody sm:text-base">{summaryLine}</p>
+        ) : null}
       </div>
     </div>
   )
