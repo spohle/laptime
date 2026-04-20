@@ -27,7 +27,7 @@ function TimeControls({
   }
 
   return (
-    <section className="min-w-0 bg-slateDeep/70 p-3 sm:p-4">
+    <section className="time-controls-panel min-w-0 bg-slateDeep/70 p-3 sm:p-4">
       <div className="mb-3">
         <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold uppercase tracking-wide text-uiMuted">
           Date

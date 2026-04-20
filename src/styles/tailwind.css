@@ -32,6 +32,11 @@ body {
     background-color: rgb(var(--pool-rail-bg) / 1);
   }
 
+  /* Date + time slider: match lane rail off-white in light theme */
+  html[data-theme='light'] .time-controls-panel {
+    background-color: rgb(var(--pool-rail-bg) / 1);
+  }
+
   /* Compact on small screens; sm+ keeps comfortable touch target */
   .time-range-input {
     @apply relative z-30 w-full cursor-pointer appearance-none bg-transparent;

@@ -87,6 +87,15 @@ html[data-theme='light'] .pool-section-title {
   color: rgb(148 163 184);
 }
 
+/* Lane color legend: match RecPool / Competition section title in light */
+.lane-legend {
+  color: rgb(var(--ui-body) / 1);
+}
+
+html[data-theme='light'] .lane-legend {
+  color: rgb(148 163 184);
+}
+
 html[data-theme='light'] {
   color-scheme: light;
   --page-base: 248 250 252;
