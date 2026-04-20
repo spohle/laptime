@@ -1,11 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { COMPETITION_POOL_ICS_URL, REC_POOL_ICS_URL } from './server/icsProxy.js'
 
 const CALENDARS = {
-  '/api/calendar-ics':
-    'https://calendar.google.com/calendar/ical/rosebowlaquatics.org_4le4udubed0tu4u9vn4ha1bcs8%40group.calendar.google.com/public/basic.ics',
-  '/api/calendar-ics-competition':
-    'https://calendar.google.com/calendar/ical/rosebowlaquatics.org_ov4u9q0a65cnor15e71ftmpn4c%40group.calendar.google.com/public/basic.ics',
+  '/api/calendar-ics': REC_POOL_ICS_URL,
+  '/api/calendar-ics-competition': COMPETITION_POOL_ICS_URL,
 }
 
 function calendarProxyPlugin() {
