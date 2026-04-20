@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import CompPoolLanes from './components/CompPoolLanes'
 import LaneLegend from './components/LaneLegend'
 import PoolLanes from './components/PoolLanes'
+import ThemeToggle from './components/ThemeToggle'
 import TimeControls from './components/TimeControls'
 import { fetchCompetitionPoolEvents, fetchRecPoolEvents } from './lib/calendarClient'
 import { getCompPoolLaneCountAtTime } from './lib/compPoolLayout'
@@ -152,9 +153,12 @@ function App() {
 
   return (
     <main className="mx-auto w-[90%] max-w-none py-8">
-      <header className="mb-6">
-        <p className="text-sm uppercase tracking-[0.25em] text-slate-300">Rose Bowl Aquatics</p>
-        <h1 className="mt-2 text-4xl font-black uppercase tracking-wide text-white md:text-5xl">Lane Visualizer</h1>
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm uppercase tracking-[0.25em] text-slate-300">Rose Bowl Aquatics</p>
+          <h1 className="mt-2 text-4xl font-black uppercase tracking-wide text-white md:text-5xl">Lane Visualizer</h1>
+        </div>
+        <ThemeToggle />
       </header>
 
       <section className="border border-white/10 bg-slateCard/70 p-4 shadow-glow backdrop-blur md:p-6">

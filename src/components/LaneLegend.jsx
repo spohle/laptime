@@ -1,8 +1,8 @@
 const LEGEND = [
-  { key: 'open', label: 'Lap Swim Open', swatch: 'bg-laneOpen text-slate-950' },
-  { key: 'reserved', label: 'Program / Reserved', swatch: 'bg-laneReserved text-slate-950' },
-  { key: 'closed', label: 'Closed / Unavailable', swatch: 'bg-laneClosed text-slate-950' },
-  { key: 'unknown', label: 'No Schedule Match', swatch: 'bg-laneUnknown text-slate-100' },
+  { key: 'open', label: 'Lap Swim Open', swatch: 'bg-laneOpen !text-slate-900' },
+  { key: 'reserved', label: 'Program / Reserved', swatch: 'bg-laneReserved !text-slate-900' },
+  { key: 'closed', label: 'Closed / Unavailable', swatch: 'bg-laneClosed !text-slate-900' },
+  { key: 'unknown', label: 'No Schedule Match', swatch: 'bg-laneUnknown !text-slate-200' },
 ]
 
 function LaneLegend() {

@@ -1,0 +1,32 @@
+/*
+ * Theme tokens live on <html> only. Amber overrides use a higher-specificity selector
+ * so lane backgrounds always resolve from the active theme (no :root tie with :root).
+ *
+ * Default ≈ first reference (purple + warm chart accents).
+ * Amber ≈ second reference (tile accents: #F4A358 amber, #B584F5 purple, #FF9F59 orange, #26282E inactive).
+ */
+html {
+  --page-base: 10 17 29;
+  --glow-spot-1: 182 136 255 / 0.12;
+  --glow-spot-2: 244 198 78 / 0.1;
+  --slate-deep: 15 23 36;
+  --slate-card: 17 26 44;
+  --lane-open: 244 198 78;
+  --lane-reserved: 182 136 255;
+  --lane-closed: 245 164 138;
+  --lane-unknown: 34 48 71;
+  --shadow-glow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 20px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme='amber'] {
+  --page-base: 38 40 46;
+  --glow-spot-1: 244 163 88 / 0.16;
+  --glow-spot-2: 86 168 232 / 0.08;
+  --slate-deep: 47 50 58;
+  --slate-card: 52 55 64;
+  --lane-open: 244 163 88;
+  --lane-reserved: 181 132 245;
+  --lane-closed: 255 159 89;
+  --lane-unknown: 38 40 46;
+  --shadow-glow: 0 0 0 1px rgba(244, 163, 88, 0.14), 0 12px 28px rgba(0, 0, 0, 0.4);
+}

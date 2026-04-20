@@ -37,9 +37,11 @@ function PoolLanes({ lanes, isLoading, timeZone, title = 'RecPool Status' }) {
             const style = STATE_STYLES[lane.state]
             return (
               <article key={lane.lane} className={`relative flex h-80 min-w-0 flex-1 flex-col justify-between p-2 shadow-md ${style.card}`}>
-                <div className="text-center text-[11px] font-bold uppercase tracking-wide text-current">Lane {lane.lane}</div>
+                <div className="text-center text-[11px] font-bold uppercase tracking-wide text-inherit">
+                  Lane {lane.lane}
+                </div>
                 {lane.state === 'open' && lane.endMs ? (
-                  <div className="absolute inset-x-1 top-1/2 -translate-y-1/2 px-1 py-2 text-center text-[10px] font-extrabold uppercase tracking-wide text-current">
+                  <div className="absolute inset-x-1 top-1/2 -translate-y-1/2 px-1 py-2 text-center text-[10px] font-extrabold uppercase tracking-wide text-inherit">
                     {formatLaneOpenUntil(lane.endMs, timeZone)}
                   </div>
                 ) : null}

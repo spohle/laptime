@@ -15,9 +15,9 @@ function formatLaneOpenUntil(endMs, timeZone) {
 function LaneStripContent({ lane, timeZone }) {
   return (
     <>
-      <div className="text-center text-[11px] font-bold uppercase tracking-wide text-current">Lane {lane.lane}</div>
+      <div className="text-center text-[11px] font-bold uppercase tracking-wide text-inherit">Lane {lane.lane}</div>
       {lane.state === 'open' && lane.endMs ? (
-        <div className="absolute inset-x-1 top-1/2 -translate-y-1/2 px-1 py-2 text-center text-[10px] font-extrabold uppercase tracking-wide text-current">
+        <div className="absolute inset-x-1 top-1/2 -translate-y-1/2 px-1 py-2 text-center text-[10px] font-extrabold uppercase tracking-wide text-inherit">
           {formatLaneOpenUntil(lane.endMs, timeZone)}
         </div>
       ) : null}
@@ -28,9 +28,9 @@ function LaneStripContent({ lane, timeZone }) {
 function LaneRowContent({ lane, timeZone }) {
   return (
     <div className="relative flex h-full w-full items-center justify-between px-3">
-      <span className="text-[11px] font-bold uppercase tracking-wide text-current">Lane {lane.lane}</span>
+      <span className="text-[11px] font-bold uppercase tracking-wide text-inherit">Lane {lane.lane}</span>
       {lane.state === 'open' && lane.endMs ? (
-        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-extrabold uppercase tracking-wide text-current">
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] font-extrabold uppercase tracking-wide text-inherit">
           {formatLaneOpenUntil(lane.endMs, timeZone)}
         </span>
       ) : null}
@@ -63,29 +63,36 @@ function CompPoolLanes({ lanes, isLoading, timeZone, layout }) {
         ) : null}
 
         {layout === 'strip20' ? (
-          <div className="flex w-full gap-1 border border-white/10 bg-slateDeep/80 p-3">
-            {lanes.map((lane) => {
-              const style = STATE_STYLES[lane.state]
-              return (
-                <article
-                  key={lane.lane}
-                  className={`relative flex h-80 min-w-0 flex-1 flex-col justify-between p-2 shadow-md ${style.card}`}
-                >
-                  <LaneStripContent lane={lane} timeZone={timeZone} />
-                </article>
-              )
-            })}
+          <div className="border border-white/10 bg-slateDeep/80 p-3">
+            <div className="flex h-80 w-full gap-1">
+              {lanes.map((lane) => {
+                const style = STATE_STYLES[lane.state]
+                return (
+                  <article
+                    key={lane.lane}
+                    className={`relative flex min-h-0 min-w-0 flex-1 flex-col justify-between p-2 shadow-md ${style.card}`}
+                  >
+                    <LaneStripContent lane={lane} timeZone={timeZone} />
+                  </article>
+                )
+              })}
+            </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-1 border border-white/10 bg-slateDeep/80 p-3">
-            {lanes.map((lane) => {
-              const style = STATE_STYLES[lane.state]
-              return (
-                <article key={lane.lane} className={`relative min-h-[4rem] w-full shadow-md ${style.card}`}>
-                  <LaneRowContent lane={lane} timeZone={timeZone} />
-                </article>
-              )
-            })}
+          <div className="border border-white/10 bg-slateDeep/80 p-3">
+            <div className="flex h-80 w-full flex-col gap-1">
+              {lanes.map((lane) => {
+                const style = STATE_STYLES[lane.state]
+                return (
+                  <article
+                    key={lane.lane}
+                    className={`relative flex min-h-0 w-full flex-1 flex-col shadow-md ${style.card}`}
+                  >
+                    <LaneRowContent lane={lane} timeZone={timeZone} />
+                  </article>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>
