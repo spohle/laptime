@@ -62,7 +62,8 @@ function App() {
       setIsLoadingComp(true)
       setError('')
 
-      const results = await Promise.allSettled([fetchRecPoolEvents(), fetchCompetitionPoolEvents()])
+      const options = { selectedDate, timeZone: TIME_ZONE }
+      const results = await Promise.allSettled([fetchRecPoolEvents(options), fetchCompetitionPoolEvents(options)])
 
       if (cancelled) {
         return
@@ -101,7 +102,7 @@ function App() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [selectedDate])
 
   const mergedEvents = useMemo(() => [...recEvents, ...compEvents], [recEvents, compEvents])
 

@@ -1,5 +1,6 @@
 import ICAL from 'ical.js'
 import { normalizeEvents } from './normalizeEvents'
+import { zoneDateMinuteToUtcMs } from './timezone'
 
 export const REC_POOL_CALENDAR_ID = 'rosebowlaquatics.org_4le4udubed0tu4u9vn4ha1bcs8@group.calendar.google.com'
 export const COMPETITION_POOL_CALENDAR_ID = 'rosebowlaquatics.org_ov4u9q0a65cnor15e71ftmpn4c@group.calendar.google.com'
@@ -59,10 +60,24 @@ function getEventBasePayload(event) {
   }
 }
 
-function collectCalendarEvents(vevents) {
-  const now = Date.now()
-  const rangeStart = now - 14 * 24 * 60 * 60 * 1000
-  const rangeEnd = now + 120 * 24 * 60 * 60 * 1000
+function getExpansionRange({ selectedDate, timeZone, daysBefore = 14, daysAfter = 120 }) {
+  if (!selectedDate) {
+    const now = Date.now()
+    return {
+      rangeStart: now - daysBefore * 24 * 60 * 60 * 1000,
+      rangeEnd: now + daysAfter * 24 * 60 * 60 * 1000,
+    }
+  }
+
+  const selectedDayStartUtcMs = zoneDateMinuteToUtcMs(selectedDate, 0, timeZone)
+  return {
+    rangeStart: selectedDayStartUtcMs - daysBefore * 24 * 60 * 60 * 1000,
+    rangeEnd: selectedDayStartUtcMs + daysAfter * 24 * 60 * 60 * 1000,
+  }
+}
+
+function collectCalendarEvents(vevents, range) {
+  const { rangeStart, rangeEnd } = range
   const expanded = []
 
   vevents.forEach((vevent) => {
@@ -104,12 +119,16 @@ function collectCalendarEvents(vevents) {
   return expanded
 }
 
-export async function fetchCalendarEventsForCalendarId(calendarId) {
+export async function fetchCalendarEventsForCalendarId(
+  calendarId,
+  { selectedDate, timeZone = 'America/Los_Angeles', daysBefore = 14, daysAfter = 120 } = {},
+) {
   const icsText = await fetchIcsTextForCalendar(calendarId)
   const jCalData = ICAL.parse(icsText)
   const calendar = new ICAL.Component(jCalData)
   const vevents = calendar.getAllSubcomponents('vevent')
-  const rawEvents = collectCalendarEvents(vevents)
+  const range = getExpansionRange({ selectedDate, timeZone, daysBefore, daysAfter })
+  const rawEvents = collectCalendarEvents(vevents, range)
 
   return normalizeEvents(rawEvents).map((event) => ({
     ...event,
@@ -117,12 +136,12 @@ export async function fetchCalendarEventsForCalendarId(calendarId) {
   }))
 }
 
-export async function fetchRecPoolEvents() {
-  return fetchCalendarEventsForCalendarId(REC_POOL_CALENDAR_ID)
+export async function fetchRecPoolEvents(options = {}) {
+  return fetchCalendarEventsForCalendarId(REC_POOL_CALENDAR_ID, options)
 }
 
-export async function fetchCompetitionPoolEvents() {
-  return fetchCalendarEventsForCalendarId(COMPETITION_POOL_CALENDAR_ID)
+export async function fetchCompetitionPoolEvents(options = {}) {
+  return fetchCalendarEventsForCalendarId(COMPETITION_POOL_CALENDAR_ID, options)
 }
 
 /** @deprecated use fetchRecPoolEvents */
