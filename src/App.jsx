@@ -2,46 +2,25 @@ import { useEffect, useMemo, useState } from 'react'
 import CompPoolLanes from './components/CompPoolLanes'
 import LaneLegend from './components/LaneLegend'
 import PoolLanes from './components/PoolLanes'
+import RecPoolDayTimeline from './components/RecPoolDayTimeline'
 import ThemeToggle from './components/ThemeToggle'
 import TimeControls from './components/TimeControls'
 import { fetchCompetitionPoolEvents, fetchRecPoolEvents } from './lib/calendarClient'
 import { getCompPoolLaneCountAtTime } from './lib/compPoolLayout'
 import { findBestRecPoolLapSwimWindow, formatBestRecPoolLapSwimLine } from './lib/recPoolBestWindow'
+import { sliderBoundsFromEvents } from './lib/sliderBounds'
 import { resolveLaneStates } from './lib/resolveLaneStates'
-import { getNowInZone, utcMsToZoneDateMinute } from './lib/timezone'
+import { getNowInZone } from './lib/timezone'
 
 const TIME_ZONE = 'America/Los_Angeles'
-const SLIDER_STEP = 5
+const REC_DISPLAY_MODES = {
+  SNAPSHOT: 'snapshot',
+  TIMELINE: 'timeline',
+}
+const PLAYBACK_DURATION_MS = 5000
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value))
-}
-
-function sliderBoundsFromEvents(events, selectedDate, timeZone) {
-  const overlaps = []
-
-  events.forEach((event) => {
-    const start = utcMsToZoneDateMinute(event.startMs, timeZone)
-    const end = utcMsToZoneDateMinute(Math.max(event.endMs - 1, event.startMs), timeZone)
-
-    if (selectedDate < start.date || selectedDate > end.date) {
-      return
-    }
-
-    const minMinute = selectedDate === start.date ? start.minute : 0
-    const maxMinute = selectedDate === end.date ? end.minute : 1439
-    overlaps.push({ minMinute, maxMinute })
-  })
-
-  if (overlaps.length === 0) {
-    return { minMinute: 0, maxMinute: 1435 }
-  }
-
-  const rawMin = Math.min(...overlaps.map((item) => item.minMinute))
-  const rawMax = Math.max(...overlaps.map((item) => item.maxMinute))
-  const minMinute = clamp(Math.floor(rawMin / SLIDER_STEP) * SLIDER_STEP, 0, 1435)
-  const maxMinute = clamp(Math.ceil(rawMax / SLIDER_STEP) * SLIDER_STEP, minMinute + SLIDER_STEP, 1435)
-  return { minMinute, maxMinute }
 }
 
 function App() {
@@ -53,6 +32,8 @@ function App() {
   const [isLoadingRec, setIsLoadingRec] = useState(true)
   const [isLoadingComp, setIsLoadingComp] = useState(true)
   const [error, setError] = useState('')
+  const [recDisplayMode, setRecDisplayMode] = useState(REC_DISPLAY_MODES.SNAPSHOT)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -110,10 +91,19 @@ function App() {
     () => sliderBoundsFromEvents(mergedEvents, selectedDate, TIME_ZONE),
     [mergedEvents, selectedDate],
   )
+  const timeSliderMaxMinute = useMemo(
+    () => Math.max(sliderBounds.minMinute, sliderBounds.maxMinute - 1),
+    [sliderBounds.minMinute, sliderBounds.maxMinute],
+  )
+
+  const recTimelineBounds = useMemo(
+    () => sliderBoundsFromEvents(recEvents, selectedDate, TIME_ZONE),
+    [recEvents, selectedDate],
+  )
 
   const effectiveMinute = useMemo(
-    () => clamp(selectedMinute, sliderBounds.minMinute, sliderBounds.maxMinute),
-    [selectedMinute, sliderBounds.minMinute, sliderBounds.maxMinute],
+    () => clamp(selectedMinute, sliderBounds.minMinute, timeSliderMaxMinute),
+    [selectedMinute, sliderBounds.minMinute, timeSliderMaxMinute],
   )
 
   const recLaneStates = useMemo(
@@ -166,6 +156,70 @@ function App() {
 
   const compLayout = compLaneCount === 20 ? 'strip20' : 'stack9'
 
+  useEffect(() => {
+    if (!isPlaying) {
+      return
+    }
+
+    if (timeSliderMaxMinute <= sliderBounds.minMinute) {
+      setIsPlaying(false)
+      return
+    }
+
+    let frameId = 0
+    let finishTimeoutId = 0
+    const startMinute = sliderBounds.minMinute
+    const endMinute = timeSliderMaxMinute
+    const minuteSpan = endMinute - startMinute
+    const animationStartMs = performance.now()
+
+    setSelectedMinute(startMinute)
+
+    const tick = (nowMs) => {
+      const elapsedMs = nowMs - animationStartMs
+      const progress = Math.min(elapsedMs / PLAYBACK_DURATION_MS, 1)
+      const rawMinute = startMinute + minuteSpan * progress
+      const snappedMinute = clamp(Math.round(rawMinute / 5) * 5, startMinute, endMinute)
+
+      setSelectedMinute((currentMinute) => (currentMinute === snappedMinute ? currentMinute : snappedMinute))
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(tick)
+        return
+      }
+
+      finishTimeoutId = window.setTimeout(() => {
+        const currentMinute = getNowInZone(TIME_ZONE).minutes
+        const clampedCurrentMinute = clamp(currentMinute, sliderBounds.minMinute, timeSliderMaxMinute)
+        setSelectedMinute(clampedCurrentMinute)
+        setIsPlaying(false)
+      }, 1000)
+    }
+
+    frameId = requestAnimationFrame(tick)
+    return () => {
+      cancelAnimationFrame(frameId)
+      window.clearTimeout(finishTimeoutId)
+    }
+  }, [isPlaying, sliderBounds.minMinute, timeSliderMaxMinute])
+
+  const handleMinuteChange = (nextMinute) => {
+    setIsPlaying(false)
+    setSelectedMinute(nextMinute)
+  }
+
+  const handleDateChange = (nextDate) => {
+    setIsPlaying(false)
+    setSelectedDate(nextDate)
+  }
+
+  const handlePlayToggle = () => {
+    if (recDisplayMode !== REC_DISPLAY_MODES.SNAPSHOT) {
+      return
+    }
+    setIsPlaying((playing) => !playing)
+  }
+
   return (
     <main className="mx-auto min-w-0 w-full max-w-6xl pb-[max(2rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pt-4 sm:pl-4 sm:pr-4 sm:py-6 md:py-8">
       <header className="mb-4 sm:mb-6">
@@ -174,7 +228,20 @@ function App() {
             <p className="min-w-0 truncate text-xs uppercase tracking-[0.25em] text-uiMuted sm:text-sm">
               Rose Bowl Aquatics
             </p>
-            <ThemeToggle />
+            <div className="flex shrink-0 items-center gap-2">
+              <label className="flex shrink-0 items-center gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-uiSoft">Display</span>
+                <select
+                  value={recDisplayMode}
+                  onChange={(event) => setRecDisplayMode(event.target.value)}
+                  className="min-h-9 min-w-[9.5rem] cursor-pointer rounded bg-uiInput/95 px-2 py-1.5 text-[11px] font-bold uppercase tracking-wide text-uiBody sm:min-h-0"
+                >
+                  <option value={REC_DISPLAY_MODES.SNAPSHOT}>Snapshot</option>
+                  <option value={REC_DISPLAY_MODES.TIMELINE}>Timeline</option>
+                </select>
+              </label>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>
@@ -185,20 +252,35 @@ function App() {
           <TimeControls
             selectedDate={selectedDate}
             selectedMinute={effectiveMinute}
-            onDateChange={setSelectedDate}
-            onMinuteChange={setSelectedMinute}
+            onDateChange={handleDateChange}
+            onMinuteChange={handleMinuteChange}
             minMinute={sliderBounds.minMinute}
-            maxMinute={sliderBounds.maxMinute}
+            maxMinute={timeSliderMaxMinute}
+            showTimeSlider={recDisplayMode === REC_DISPLAY_MODES.SNAPSHOT}
+            isPlaying={isPlaying}
+            onPlayToggle={handlePlayToggle}
           />
         </div>
         <div className="order-2 flex min-w-0 flex-col md:order-1">
-          <PoolLanes
-            lanes={recLaneStates}
-            isLoading={isLoadingRec}
-            timeZone={TIME_ZONE}
-            title="RecPool Status"
-            summaryLine={recPeakLapSwimLine}
-          />
+          {recDisplayMode === REC_DISPLAY_MODES.SNAPSHOT ? (
+            <PoolLanes
+              lanes={recLaneStates}
+              isLoading={isLoadingRec}
+              timeZone={TIME_ZONE}
+              title="RecPool Status"
+              summaryLine={recPeakLapSwimLine}
+            />
+          ) : (
+            <RecPoolDayTimeline
+              events={recEvents}
+              selectedDate={selectedDate}
+              timeZone={TIME_ZONE}
+              isLoading={isLoadingRec}
+              title="RecPool Day Timeline"
+              minMinute={recTimelineBounds.minMinute}
+              maxMinute={recTimelineBounds.maxMinute}
+            />
+          )}
           <LaneLegend />
           <CompPoolLanes
             lanes={compLaneStates}

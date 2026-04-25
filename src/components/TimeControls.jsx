@@ -8,6 +8,9 @@ function TimeControls({
   onMinuteChange,
   minMinute,
   maxMinute,
+  showTimeSlider = true,
+  isPlaying = false,
+  onPlayToggle,
 }) {
   const thumbPercent = useMemo(() => {
     if (maxMinute <= minMinute) return 0
@@ -41,33 +44,45 @@ function TimeControls({
         </label>
       </div>
 
-      <div className="relative flex min-w-0 flex-col overflow-x-clip pt-4 sm:pt-9">
-        <div
-          className="pointer-events-none absolute left-0 top-0 z-10 max-w-full -translate-x-1/2"
-          style={{ left: `${thumbPercent}%` }}
-          aria-hidden
-        >
-          <span className="inline-block max-w-[14rem] truncate bg-uiElevated/95 px-1.5 py-0.5 text-center text-[10px] font-bold leading-tight text-laneOpen shadow-md sm:max-w-none sm:px-2 sm:py-1 sm:text-sm">
-            {formatMinuteLabel(selectedMinute)}
-          </span>
+      {showTimeSlider ? (
+        <div className="relative flex min-w-0 flex-col overflow-x-clip pt-4 sm:pt-9">
+          <div
+            className="pointer-events-none absolute left-0 top-0 z-10 max-w-full -translate-x-1/2"
+            style={{ left: `${thumbPercent}%` }}
+            aria-hidden
+          >
+            <span className="inline-block max-w-[14rem] truncate bg-uiElevated/95 px-1.5 py-0.5 text-center text-[10px] font-bold leading-tight text-laneOpen shadow-md sm:max-w-none sm:px-2 sm:py-1 sm:text-sm">
+              {formatMinuteLabel(selectedMinute)}
+            </span>
+          </div>
+          <div className="relative z-30 px-0.5 py-1 sm:py-0">
+            <input
+              type="range"
+              min={minMinute}
+              max={maxMinute}
+              step="5"
+              value={selectedMinute}
+              onChange={handleSliderChange}
+              onInput={handleSliderChange}
+              className="time-range-input"
+            />
+          </div>
+          <div className="mt-1 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-uiMuted sm:mt-2">
+            <span>{formatMinuteLabel(minMinute)}</span>
+            <span>{formatMinuteLabel(maxMinute)}</span>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={onPlayToggle}
+              disabled={maxMinute <= minMinute}
+              className="min-h-10 rounded bg-uiInput/95 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-uiBody disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+            >
+              {isPlaying ? 'Stop' : 'Play'}
+            </button>
+          </div>
         </div>
-        <div className="relative z-30 px-0.5 py-1 sm:py-0">
-          <input
-            type="range"
-            min={minMinute}
-            max={maxMinute}
-            step="5"
-            value={selectedMinute}
-            onChange={handleSliderChange}
-            onInput={handleSliderChange}
-            className="time-range-input"
-          />
-        </div>
-        <div className="mt-1 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-uiMuted sm:mt-2">
-          <span>{formatMinuteLabel(minMinute)}</span>
-          <span>{formatMinuteLabel(maxMinute)}</span>
-        </div>
-      </div>
+      ) : null}
     </section>
   )
 }
